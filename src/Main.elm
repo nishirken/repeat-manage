@@ -2,15 +2,9 @@ import Html exposing (..)
 import Html.Events exposing (..)
 import Browser
 
-type alias Model =
-  { currentSymbol : String
-  , symbols : List String
-  }
 
-type Msg
-  = ChangeSymbol String
-  | AddSymbol String
-  | RemoveSymbol String
+
+
 
 main = Browser.document
   { init = init
