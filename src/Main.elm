@@ -1,10 +1,21 @@
 import Html exposing (..)
 import Html.Events exposing (..)
 import Browser
+import Stripe as S
+import AddSymbol
+import SymbolsList
 
+type alias Model =
+  { stripeModel : S.Model
+  , symbols : List String
+  , addSymbolModel : AddSymbol.Model
+  , symbolsListModel : SymbolsList.Model
+  }
 
-
-
+type Msg
+  = StripeMsg ()
+  | AddSymbolMsg AddSymbol.Msg
+  | SymbolsListMsg SymbolsList.Msg
 
 main = Browser.document
   { init = init
@@ -14,28 +25,39 @@ main = Browser.document
   }
 
 init : () -> (Model, Cmd Msg)
-init _ = (Model "" [], Cmd.none)
-
-pop : List a -> List a
-pop xs = case (List.reverse >> List.tail) xs of
-  (Just t) -> List.reverse t
-  Nothing -> []
+init _ = (
+  { stripeModel = S.initialModel
+  , symbols = []
+  , addSymbolModel = AddSymbol.initialModel
+  , symbolsListModel = SymbolsList.initialModel
+  }, Cmd.none)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  case msg of
-    (ChangeSymbol symbol) -> ({ model | currentSymbol = symbol }, Cmd.none)
-    (AddSymbol symbol) -> ({ model | symbols = (List.append model.symbols [symbol]) }, Cmd.none)
-    (RemoveSymbol symbol) ->
-      ({ model | symbols = pop model.symbols }, Cmd.none)
+  let { stripeModel, addSymbolModel, symbolsListModel, symbols } = model in
+    case msg of
+      (StripeMsg subMsg) -> let updatedModel = S.update subMsg stripeModel in
+        ({ model | stripeModel = updatedModel }, Cmd.none)
+      (AddSymbolMsg subMsg) -> let updatedModel = AddSymbol.update subMsg addSymbolModel in case subMsg of
+        (AddSymbol.AddSymbol symbol) ->
+          ({ model
+          | symbols = List.append symbols [symbol]
+          , addSymbolModel = updatedModel
+          }, Cmd.none)
+        (AddSymbol.InputChanged x) -> ({ model | addSymbolModel = updatedModel }, Cmd.none)
+      (SymbolsListMsg subMsg) -> let updatedModel = SymbolsList.update subMsg symbolsListModel in case subMsg of
+        (SymbolsList.DeleteSymbol symbol) ->
+          ({ model
+          | symbols = List.filter (\s -> s /= symbol) symbols
+          , symbolsListModel = updatedModel
+          }, Cmd.none)
 
 view : Model -> Browser.Document Msg
-view model =
+view { stripeModel, addSymbolModel, symbols } =
   { title = "Repeat"
   , body =
-    [ div [] [text model.currentSymbol]
-    , div [] (map model.symbols (\s -> div [] [text s]))
-    , button [onClick (AddSymbol "2323")] [text "Add"]
-    , button [onClick (RemoveSymbol "2323")] [text "Remove"]
+    [ Html.map StripeMsg (S.view { stripeModel | symbols = symbols })
+    , Html.map AddSymbolMsg (AddSymbol.view addSymbolModel)
+    , Html.map SymbolsListMsg (SymbolsList.view { symbols = symbols })
     ]
   }
