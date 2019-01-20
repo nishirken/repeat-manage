@@ -1,9 +1,12 @@
-import Html exposing (..)
-import Html.Events exposing (..)
+import Html
+import Html.Styled exposing (..)
+import Html.Styled.Events exposing (..)
+import Html.Styled.Attributes exposing (class, href, rel)
 import Browser
 import Stripe as S
 import AddSymbol
 import SymbolsList
+import Styles
 
 type alias Model =
   { stripeModel : S.Model
@@ -55,9 +58,13 @@ update msg model =
 view : Model -> Browser.Document Msg
 view { stripeModel, addSymbolModel, symbols } =
   { title = "Repeat"
-  , body =
-    [ Html.map StripeMsg (S.view { stripeModel | symbols = symbols })
-    , Html.map AddSymbolMsg (AddSymbol.view addSymbolModel)
-    , Html.map SymbolsListMsg (SymbolsList.view { symbols = symbols })
+  , body = List.append (List.map Html.Styled.toUnstyled
+    [ Styles.globalStyles
+    , Styles.fonts
+    , Html.Styled.map StripeMsg (S.view { stripeModel | symbols = symbols })
+    , Styles.root [] [
+        Html.Styled.map AddSymbolMsg (AddSymbol.view addSymbolModel)
+      , Html.Styled.map SymbolsListMsg (SymbolsList.view { symbols = symbols })
     ]
+    ]) [Styles.fonts]
   }

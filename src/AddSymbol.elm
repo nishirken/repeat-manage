@@ -1,13 +1,13 @@
 module AddSymbol exposing (..)
 
 import Browser
-import Html exposing (..)
-import Html.Events exposing (onInput, onClick)
+import Html.Styled exposing (..)
+import Html.Styled.Events exposing (onInput, onClick)
 
 main = Browser.sandbox
   { init = initialModel
   , update = update
-  , view = view
+  , view = toUnstyled << view
   }
 
 initialModel = Model ""

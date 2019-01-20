@@ -1,13 +1,14 @@
 module SymbolsList exposing (..)
 
 import Browser
-import Html exposing (..)
-import Html.Events exposing (onClick)
+import Html.Styled exposing (..)
+import Html.Styled.Events exposing (onClick)
+import Styles
 
 main = Browser.sandbox
   { init = initialModel
   , update = update
-  , view = view
+  , view = toUnstyled << view
   }
 
 type alias Model = { symbols : List String }
@@ -21,11 +22,11 @@ update _ model = model
 
 symbolView : String -> Html Msg
 symbolView symbol =
-  li [] [
+  div [] [
     text symbol
     , button [onClick (DeleteSymbol symbol)] [text "delete"]
   ]
 
 view : Model -> Html Msg
 view { symbols } =
-  ul [] (List.map symbolView symbols)
+  Styles.stripe [] (List.map symbolView symbols)

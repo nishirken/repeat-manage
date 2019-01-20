@@ -1,8 +1,8 @@
 module Stripe exposing (..)
 
-import Html exposing (..)
-import Html.Events exposing (onClick)
-import Html.Attributes exposing (attribute)
+import Html.Styled exposing (..)
+import Html.Styled.Events exposing (onClick)
+import Html.Styled.Attributes exposing (attribute)
 import Browser
 
 type alias Model =
@@ -13,7 +13,7 @@ type alias Model =
 main = Browser.sandbox
   { init = initialModel
   , update = update
-  , view = view
+  , view = toUnstyled << view
   }
 
 initialModel = Model 0 []
