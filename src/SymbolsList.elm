@@ -29,4 +29,4 @@ symbolView symbol =
 
 view : Model -> Html Msg
 view { symbols } =
-  Styles.stripe [] (List.map symbolView symbols)
+  div [] (List.map symbolView symbols)

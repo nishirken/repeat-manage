@@ -1,0 +1,24 @@
+{
+  "name": "repeat-manage",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "elm-live": "^3.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "elm-live src/Main.elm --start-page=custom.html -- --output=dist/elm.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nishirken/repeat-manage.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nishirken/repeat-manage/issues"
+  },
+  "homepage": "https://github.com/nishirken/repeat-manage#readme"
+}

@@ -3,6 +3,7 @@ module AddSymbol exposing (..)
 import Browser
 import Html.Styled exposing (..)
 import Html.Styled.Events exposing (onInput, onClick)
+import Styles
 
 main = Browser.sandbox
   { init = initialModel
@@ -26,7 +27,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  div [] [
+  Styles.addSymbol [] [
     input [onInput InputChanged] []
     , button [onClick (AddSymbol model.symbol)] [text "Add"]
   ]

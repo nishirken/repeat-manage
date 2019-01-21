@@ -58,13 +58,14 @@ update msg model =
 view : Model -> Browser.Document Msg
 view { stripeModel, addSymbolModel, symbols } =
   { title = "Repeat"
-  , body = List.append (List.map Html.Styled.toUnstyled
+  , body = List.map Html.Styled.toUnstyled
     [ Styles.globalStyles
-    , Styles.fonts
-    , Html.Styled.map StripeMsg (S.view { stripeModel | symbols = symbols })
     , Styles.root [] [
-        Html.Styled.map AddSymbolMsg (AddSymbol.view addSymbolModel)
-      , Html.Styled.map SymbolsListMsg (SymbolsList.view { symbols = symbols })
+        Html.Styled.map StripeMsg (S.view { stripeModel | symbols = symbols })
+      , Styles.bottomSection [] [
+          Html.Styled.map AddSymbolMsg (AddSymbol.view addSymbolModel)
+        , Html.Styled.map SymbolsListMsg (SymbolsList.view { symbols = symbols })
+      ]
     ]
-    ]) [Styles.fonts]
+    ]
   }
