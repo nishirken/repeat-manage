@@ -18,7 +18,8 @@ type Msg = DeleteSymbol String
 initialModel = Model []
 
 update : Msg -> Model -> Model
-update _ model = model
+update msg model = case msg of
+  (DeleteSymbol symbol) -> { symbols = List.filter (\s -> s /= symbol) model.symbols }
 
 symbolView : String -> Html Msg
 symbolView symbol =
