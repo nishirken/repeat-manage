@@ -61,13 +61,15 @@ view { stripeModel, addSymbolModel, changeSpeedModel, symbolsListModel } =
   { title = "Repeat"
   , body = List.map Html.Styled.toUnstyled
     [ Styles.globalStyles
-    , Styles.root [] [
-        Html.Styled.map StripeMsg (S.view { stripeModel | symbols = symbolsListModel.symbols })
-      , Styles.bottomSection [] [
-        Html.Styled.map ChangeSpeedMsg (ChangeSpeed.view changeSpeedModel)
-        , Html.Styled.map AddSymbolMsg (AddSymbol.view addSymbolModel)
-        , Html.Styled.map SymbolsListMsg (SymbolsList.view symbolsListModel)
+    , Styles.root []
+      [ Html.Styled.map ChangeSpeedMsg (ChangeSpeed.view changeSpeedModel)
+      , Html.Styled.map StripeMsg (S.view { stripeModel | symbols = symbolsListModel.symbols })
+      , Styles.bottomSection []
+        [ Styles.asideList []
+          [ Html.Styled.map AddSymbolMsg (AddSymbol.view addSymbolModel)
+          , Html.Styled.map SymbolsListMsg (SymbolsList.view symbolsListModel)
+          ]
+        ]
       ]
-    ]
     ]
   }

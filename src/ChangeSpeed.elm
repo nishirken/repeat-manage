@@ -2,8 +2,9 @@ module ChangeSpeed exposing (..)
 
 import Browser
 import Html.Styled exposing (..)
-import Html.Styled.Attributes exposing (type_)
+import Html.Styled.Attributes exposing (type_, value)
 import Html.Styled.Events exposing (onInput)
+import Styles
 
 main = Browser.sandbox
   { init = initialModel
@@ -27,11 +28,15 @@ onInputChange : String -> Int -> Msg
 onInputChange value currentValue = let intVal = String.toInt value in
   case intVal of
     (Just x) -> Change x
-    Nothing -> Change currentValue
+    Nothing -> Change (currentValue )
 
 view : Model -> Html Msg
 view model =
   div [] [
-    input [type_ "number", (onInput (\x -> onInputChange x model.speed))] []
-    , div [] [(String.fromInt >> text) model.speed]
+    Styles.speedInput
+      [ type_ "text"
+      , (onInput (\x -> onInputChange x model.speed))
+      , value (String.fromInt model.speed)
+      ]
+      []
   ]

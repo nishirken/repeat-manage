@@ -5,6 +5,12 @@ import Css.Global as GlobalCss
 import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (css, href, src, type_, rel)
 import Html.Styled.Events exposing (onClick)
+import Css.Transitions as Transitions
+
+mainFont = "Sarabun"
+bgColor = hex "ffd54f"
+mainColor = hex "ff5722"
+sndColor = hex "ffecb3"
 
 reset =
   [ margin (px 0)
@@ -18,8 +24,8 @@ globalStyles = GlobalCss.global
     displayFlex
     , height (pct 100)
     , color (hex "000")
-    , backgroundColor (hex "ffdd72")
-    , fontFamilies ["Sarabun"]
+    , backgroundColor bgColor
+    , fontFamilies [mainFont]
   ]
   , GlobalCss.html [
     height (pct 100)
@@ -50,14 +56,55 @@ bottomSection : List (Attribute msg) -> List (Html msg) -> Html msg
 bottomSection =
   styled section
     [ displayFlex
+    , justifyContent spaceAround
     , width (pct 100)
+    , maxWidth (px 700)
     ]
 
-addSymbol : List (Attribute msg) -> List (Html msg) -> Html msg
-addSymbol =
+opacityTransition =
+  [ opacity (num 0.6)
+  , Transitions.transition
+    [ Transitions.opacity 500 ]
+    , hover [ opacity (num 1) ]
+  ]
+
+asideList : List (Attribute msg) -> List (Html msg) -> Html msg
+asideList =
   styled aside
-    [ displayFlex
-    , flexDirection column
-    , width (px 200)
-    , opacity (int 2)
+    (List.append
+      [ displayFlex
+      , flexDirection column
+      , width (px 200)
+      , height (pct 100)
+      ] opacityTransition)
+
+styledInput : List (Attribute msg) -> List (Html msg) -> Html msg
+styledInput =
+  styled input
+    [ outline none
+    , border3 (px 1) solid mainColor
+    , padding2 (px 5) (px 12)
+    , backgroundColor sndColor
+    , fontFamilies [mainFont]
+    , fontSize (px 16)
+    ]
+
+speedInput : List (Attribute msg) -> List (Html msg) -> Html msg
+speedInput =
+  styled styledInput
+    (List.append
+      [ width (px 150)
+      , margin2 (px 50) auto
+      , fontSize (px 24)
+      , textAlign center
+      ] opacityTransition)
+
+addButton : List (Attribute msg) -> List (Html msg) -> Html msg
+addButton =
+  styled button
+    [ padding2 (px 5) (px 15)
+    , outline none
+    , backgroundColor mainColor
+    , borderWidth (px 0)
+    , cursor pointer
     ]

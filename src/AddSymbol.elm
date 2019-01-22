@@ -27,7 +27,7 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  Styles.addSymbol [] [
-    input [onInput InputChanged] []
-    , button [onClick (AddSymbol model.symbol)] [text "Add"]
+  div [] [
+    Styles.styledInput [onInput InputChanged] []
+    , Styles.addButton [onClick (AddSymbol model.symbol)] [text "Add"]
   ]
