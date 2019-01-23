@@ -3,21 +3,21 @@ import Html.Styled exposing (..)
 import Html.Styled.Events exposing (..)
 import Html.Styled.Attributes exposing (class, href, rel)
 import Browser
-import Stripe as S
+import Stripe
 import AddSymbol
 import SymbolsList
 import Styles
 import ChangeSpeed
 
 type alias Model =
-  { stripeModel : S.Model
+  { stripeModel : Stripe.Model
   , addSymbolModel : AddSymbol.Model
   , symbolsListModel : SymbolsList.Model
   , changeSpeedModel : ChangeSpeed.Model
   }
 
 type Msg
-  = StripeMsg ()
+  = StripeMsg Stripe.Msg
   | AddSymbolMsg AddSymbol.Msg
   | SymbolsListMsg SymbolsList.Msg
   | ChangeSpeedMsg ChangeSpeed.Msg
@@ -31,7 +31,7 @@ main = Browser.document
 
 init : () -> (Model, Cmd Msg)
 init _ = (
-  { stripeModel = S.initialModel
+  { stripeModel = Stripe.initialModel
   , addSymbolModel = AddSymbol.initialModel
   , symbolsListModel = SymbolsList.initialModel
   , changeSpeedModel = ChangeSpeed.initialModel
@@ -41,7 +41,7 @@ update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   let { stripeModel, addSymbolModel, symbolsListModel, changeSpeedModel } = model in
     case msg of
-      (StripeMsg subMsg) -> let updatedModel = S.update subMsg stripeModel in
+      (StripeMsg subMsg) -> let (updatedModel, _) = Stripe.update subMsg stripeModel in
         ({ model | stripeModel = updatedModel }, Cmd.none)
       (AddSymbolMsg subMsg) -> let updatedModel = AddSymbol.update subMsg addSymbolModel in case subMsg of
         (AddSymbol.AddSymbol symbol) ->
@@ -63,7 +63,7 @@ view { stripeModel, addSymbolModel, changeSpeedModel, symbolsListModel } =
     [ Styles.globalStyles
     , Styles.root []
       [ Html.Styled.map ChangeSpeedMsg (ChangeSpeed.view changeSpeedModel)
-      , Html.Styled.map StripeMsg (S.view { stripeModel | symbols = symbolsListModel.symbols })
+      , Html.Styled.map StripeMsg (Stripe.view { stripeModel | symbols = symbolsListModel.symbols })
       , Styles.bottomSection []
         [ Styles.asideList []
           [ Html.Styled.map AddSymbolMsg (AddSymbol.view addSymbolModel)

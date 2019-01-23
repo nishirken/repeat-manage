@@ -11,17 +11,23 @@ type alias Model =
   , symbols : List String
   }
 
-main = Browser.sandbox
-  { init = initialModel
+type Msg = NextSymbol String
+
+main = Browser.element
+  { init = init
   , update = update
   , view = toUnstyled << view
+  , subscriptions = \_ -> Sub.none
   }
 
 initialModel = Model 0 []
 
-update : () -> Model -> Model
-update _ model = model
+init : () -> (Model, Cmd Msg)
+init _ = (initialModel, Cmd.none)
 
-view : Model -> Html ()
+update : Msg -> Model -> (Model, Cmd Msg)
+update _ model = (model, Cmd.none)
+
+view : Model -> Html Msg
 view model =
   Styles.stripe [] (List.map (\s -> div [] [text s]) model.symbols)

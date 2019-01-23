@@ -23,9 +23,9 @@ update msg model = case msg of
 
 symbolView : String -> Html Msg
 symbolView symbol =
-  div [] [
+  Styles.listItemWrapper [] [
     text symbol
-    , button [onClick (DeleteSymbol symbol)] [text "delete"]
+    , Styles.styledButton [onClick (DeleteSymbol symbol)] [text "delete"]
   ]
 
 view : Model -> Html Msg

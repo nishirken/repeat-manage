@@ -81,7 +81,8 @@ asideList =
 styledInput : List (Attribute msg) -> List (Html msg) -> Html msg
 styledInput =
   styled input
-    [ outline none
+    [ width (px 100)
+    , outline none
     , border3 (px 1) solid mainColor
     , padding2 (px 5) (px 12)
     , backgroundColor sndColor
@@ -93,18 +94,33 @@ speedInput : List (Attribute msg) -> List (Html msg) -> Html msg
 speedInput =
   styled styledInput
     (List.append
-      [ width (px 150)
-      , margin2 (px 50) auto
+      [ margin2 (px 50) auto
       , fontSize (px 24)
       , textAlign center
       ] opacityTransition)
 
-addButton : List (Attribute msg) -> List (Html msg) -> Html msg
-addButton =
+styledButton : List (Attribute msg) -> List (Html msg) -> Html msg
+styledButton =
   styled button
-    [ padding2 (px 5) (px 15)
+    [ width (px 60)
+    , padding2 (px 5) (px 15)
     , outline none
     , backgroundColor mainColor
     , borderWidth (px 0)
     , cursor pointer
     ]
+
+buttonWrapper : List (Attribute msg) -> List (Html msg) -> Html msg
+buttonWrapper =
+  styled div
+    [ displayFlex
+    , justifyContent spaceBetween
+    , width (px 160)
+    , marginBottom (px 10)
+    , boxSizing borderBox
+    ]
+
+listItemWrapper : List (Attribute msg) -> List (Html msg) -> Html msg
+listItemWrapper =
+  styled buttonWrapper
+    [ paddingLeft (px 10) ]
