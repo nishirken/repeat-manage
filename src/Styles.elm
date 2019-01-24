@@ -50,7 +50,15 @@ stripe =
     , height (px 200)
     , margin3 (px 100) (px 0) (px 50)
     , padding2 (px 0) (px 200)
+    , fontWeight (int 800)
+    , fontSize (px 130)
     ]
+
+currentSymbol : List (Attribute msg) -> List (Html msg) -> Html msg
+currentSymbol =
+  styled div
+    [ fontSize (Css.em 1)
+    , border3 (px 1) solid sndColor]
 
 opacityTransition =
   [ opacity (num 0.6)
