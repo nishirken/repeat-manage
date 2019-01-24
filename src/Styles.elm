@@ -52,15 +52,6 @@ stripe =
     , padding2 (px 0) (px 200)
     ]
 
-bottomSection : List (Attribute msg) -> List (Html msg) -> Html msg
-bottomSection =
-  styled section
-    [ displayFlex
-    , justifyContent spaceAround
-    , width (pct 100)
-    , maxWidth (px 700)
-    ]
-
 opacityTransition =
   [ opacity (num 0.6)
   , Transitions.transition
@@ -76,6 +67,8 @@ asideList =
       , flexDirection column
       , width (px 200)
       , height (pct 100)
+      , marginLeft auto
+      , marginTop (px 150)
       ] opacityTransition)
 
 styledInput : List (Attribute msg) -> List (Html msg) -> Html msg

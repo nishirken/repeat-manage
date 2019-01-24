@@ -64,12 +64,10 @@ view { stripeModel, addSymbolModel, changeSpeedModel, symbolsListModel } =
     , Styles.root []
       [ Html.Styled.map ChangeSpeedMsg (ChangeSpeed.view changeSpeedModel)
       , Html.Styled.map StripeMsg (Stripe.view { stripeModel | symbols = symbolsListModel.symbols })
-      , Styles.bottomSection []
-        [ Styles.asideList []
+      , Styles.asideList []
           [ Html.Styled.map AddSymbolMsg (AddSymbol.view addSymbolModel)
           , Html.Styled.map SymbolsListMsg (SymbolsList.view symbolsListModel)
           ]
-        ]
       ]
     ]
   }
