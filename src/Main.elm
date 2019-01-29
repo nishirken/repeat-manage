@@ -44,7 +44,7 @@ update msg model =
       (StripeMsg subMsg) -> let (updatedModel, _) = Stripe.update subMsg stripeModel in
         ({ model | stripeModel = updatedModel }, Cmd.none)
       (AddSymbolMsg subMsg) -> let updatedModel = AddSymbol.update subMsg addSymbolModel in case subMsg of
-        (AddSymbol.AddSymbol symbol) -> let newSymbols = List.append symbolsListModel.symbols [symbol] in
+        (AddSymbol.AddSymbol symbol) -> let newSymbols = symbolsListModel.symbols ++ [symbol] in
           ({ model
           | symbolsListModel = { symbols = newSymbols }
           , addSymbolModel = updatedModel
@@ -55,7 +55,10 @@ update msg model =
         (SymbolsList.DeleteSymbol symbol) ->
           ({ model | symbolsListModel = updatedModel }, Cmd.none)
       (ChangeSpeedMsg subMsg) -> let updatedModel = ChangeSpeed.update subMsg changeSpeedModel in
-        ({ model | changeSpeedModel = updatedModel }, Cmd.none)
+        ({ model
+        | changeSpeedModel = updatedModel
+        , stripeModel = { stripeModel | speed = updatedModel.speed }
+        }, Cmd.none)
 
 view : Model -> Browser.Document Msg
 view { stripeModel, addSymbolModel, changeSpeedModel, symbolsListModel } =

@@ -8,7 +8,8 @@ import Browser
 import Styles
 import Process
 import Task
-import List exposing (take, append)
+import List exposing (take, reverse, head)
+import Time
 
 type alias Model =
   { speed : Int
@@ -17,19 +18,23 @@ type alias Model =
   , viewSymbols : List String
   }
 
-type Msg = NextSymbol
+type Msg = NextSymbol String
 
 main = Browser.element
   { init = init
   , update = update
   , view = toUnstyled << view
-  , subscriptions = \_ -> Sub.none
+  , subscriptions = subscriptions
   }
 
 initialModel = Model 0 [] [] []
 
 init : () -> (Model, Cmd Msg)
-init _ = (initialModel, delay 2000 NextSymbol)
+init _ = (initialModel, Cmd.none)
+
+subscriptions model = case (reverse >> head) model.symbols of
+  (Just x) -> Time.every 1000 (\_ -> NextSymbol x)
+  Nothing -> Sub.none
 
 delay : Float -> Msg -> Cmd Msg
 delay time msg =
@@ -37,14 +42,16 @@ delay time msg =
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  ({ model
-  | viewSymbols = append (take 1 model.symbols) model.viewSymbols
-  }, delay (toFloat model.speed) NextSymbol)
+  case msg of
+    (NextSymbol x) ->
+      ({ model
+      | viewSymbols = x :: model.viewSymbols
+      }, Cmd.none)
 
 view : Model -> Html Msg
 view model =
   Styles.stripe
     [ css
-      [ transform (translateX (px 50))]
+      [ transform (translateX (px 50)) ]
     ]
-    (List.append (List.map (\s -> div [] [text s]) model.viewSymbols) [button [onClick NextSymbol] [text "start"]])
+    ((List.map (\s -> div [] [text s]) model.viewSymbols) ++ [button [] [text "start"]])
