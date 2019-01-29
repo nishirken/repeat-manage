@@ -17,7 +17,7 @@ type alias Model =
 
 type Msg = Change Int
 
-initialModel = Model 0
+initialModel = Model 1000
 
 update : Msg -> Model -> Model
 update msg model =

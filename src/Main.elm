@@ -44,10 +44,11 @@ update msg model =
       (StripeMsg subMsg) -> let (updatedModel, _) = Stripe.update subMsg stripeModel in
         ({ model | stripeModel = updatedModel }, Cmd.none)
       (AddSymbolMsg subMsg) -> let updatedModel = AddSymbol.update subMsg addSymbolModel in case subMsg of
-        (AddSymbol.AddSymbol symbol) ->
+        (AddSymbol.AddSymbol symbol) -> let newSymbols = List.append symbolsListModel.symbols [symbol] in
           ({ model
-          | symbolsListModel = { symbols = List.append symbolsListModel.symbols [symbol] }
+          | symbolsListModel = { symbols = newSymbols }
           , addSymbolModel = updatedModel
+          , stripeModel = { stripeModel | symbols = newSymbols }
           }, Cmd.none)
         (AddSymbol.InputChanged x) -> ({ model | addSymbolModel = updatedModel }, Cmd.none)
       (SymbolsListMsg subMsg) -> let updatedModel = SymbolsList.update subMsg symbolsListModel in case subMsg of
@@ -63,7 +64,7 @@ view { stripeModel, addSymbolModel, changeSpeedModel, symbolsListModel } =
     [ Styles.globalStyles
     , Styles.root []
       [ Html.Styled.map ChangeSpeedMsg (ChangeSpeed.view changeSpeedModel)
-      , Html.Styled.map StripeMsg (Stripe.view { stripeModel | symbols = symbolsListModel.symbols })
+      , Html.Styled.map StripeMsg (Stripe.view stripeModel)
       , Styles.asideList []
           [ Html.Styled.map AddSymbolMsg (AddSymbol.view addSymbolModel)
           , Html.Styled.map SymbolsListMsg (SymbolsList.view symbolsListModel)

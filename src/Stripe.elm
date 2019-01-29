@@ -1,14 +1,19 @@
 module Stripe exposing (..)
 
+import Css exposing (..)
 import Html.Styled exposing (..)
 import Html.Styled.Events exposing (onClick)
-import Html.Styled.Attributes exposing (attribute)
+import Html.Styled.Attributes exposing (attribute, css)
 import Browser
 import Styles
+import Process
+import Task
+import List exposing (take, append)
 
 type alias Model =
   { speed : Int
   , symbols : List String
+  , tempSymbols : List String
   , viewSymbols : List String
   }
 
@@ -21,27 +26,25 @@ main = Browser.element
   , subscriptions = \_ -> Sub.none
   }
 
-initialModel = Model 0 [] []
+initialModel = Model 0 [] [] []
 
 init : () -> (Model, Cmd Msg)
-init _ = (initialModel, Cmd.none)
+init _ = (initialModel, delay 2000 NextSymbol)
 
-delay : Time.Time -> Msg -> Cmd Msg
+delay : Float -> Msg -> Cmd Msg
 delay time msg =
-  Process.sleep time
-  |> Task.perform (\_ -> msg)
-
-endlessList : List String -> List String
-endlessList symbols = case List.head symbols of
-  (Just x) -> case List.tail symbols of
-    (Just xs) -> List.append xs [x]
-    Nothing -> symbols
-  Nothing -> symbols
+  Task.perform (\_ -> msg) (Process.sleep time)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  ({ model | viewSymbols = endlessList model.viewSymbols }, delay model.speed NextSymbol)
+  ({ model
+  | viewSymbols = append (take 1 model.symbols) model.viewSymbols
+  }, delay (toFloat model.speed) NextSymbol)
 
 view : Model -> Html Msg
 view model =
-  Styles.stripe [] (List.map (\s -> div [] [text s]) model.symbols)
+  Styles.stripe
+    [ css
+      [ transform (translateX (px 50))]
+    ]
+    (List.append (List.map (\s -> div [] [text s]) model.viewSymbols) [button [onClick NextSymbol] [text "start"]])
