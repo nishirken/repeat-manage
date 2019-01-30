@@ -24,17 +24,14 @@ main = Browser.element
   { init = init
   , update = update
   , view = toUnstyled << view
-  , subscriptions = subscriptions
+  , subscriptions = \_ -> Sub.none
   }
 
 initialModel = Model 0 [] [] []
+initialCmd = delay 1500 (NextSymbol "x")
 
 init : () -> (Model, Cmd Msg)
-init _ = (initialModel, Cmd.none)
-
-subscriptions model = case (reverse >> head) model.symbols of
-  (Just x) -> Time.every 1000 (\_ -> NextSymbol x)
-  Nothing -> Sub.none
+init _ = (initialModel, initialCmd)
 
 delay : Float -> Msg -> Cmd Msg
 delay time msg =
@@ -46,7 +43,7 @@ update msg model =
     (NextSymbol x) ->
       ({ model
       | viewSymbols = x :: model.viewSymbols
-      }, Cmd.none)
+      }, delay (toFloat model.speed) (NextSymbol "x"))
 
 view : Model -> Html Msg
 view model =

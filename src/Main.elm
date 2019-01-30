@@ -31,18 +31,18 @@ main = Browser.document
 
 init : () -> (Model, Cmd Msg)
 init _ = (
-  { stripeModel = Stripe.initialModel
+  { stripeModel = let m = Stripe.initialModel in { m | speed = ChangeSpeed.initialSpeed }
   , addSymbolModel = AddSymbol.initialModel
   , symbolsListModel = SymbolsList.initialModel
   , changeSpeedModel = ChangeSpeed.initialModel
-  }, Cmd.none)
+  }, Cmd.batch [Cmd.map StripeMsg Stripe.initialCmd])
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   let { stripeModel, addSymbolModel, symbolsListModel, changeSpeedModel } = model in
     case msg of
-      (StripeMsg subMsg) -> let (updatedModel, _) = Stripe.update subMsg stripeModel in
-        ({ model | stripeModel = updatedModel }, Cmd.none)
+      (StripeMsg subMsg) -> let (updatedModel, updatedCmd) = Stripe.update subMsg stripeModel in
+        ({ model | stripeModel = updatedModel }, Cmd.map StripeMsg updatedCmd)
       (AddSymbolMsg subMsg) -> let updatedModel = AddSymbol.update subMsg addSymbolModel in case subMsg of
         (AddSymbol.AddSymbol symbol) -> let newSymbols = symbolsListModel.symbols ++ [symbol] in
           ({ model
