@@ -18,7 +18,7 @@ type alias Model =
   , viewSymbols : List String
   }
 
-type Msg = NextSymbol String
+type Msg = NextSymbol
 
 main = Browser.element
   { init = init
@@ -28,7 +28,7 @@ main = Browser.element
   }
 
 initialModel = Model 0 [] [] []
-initialCmd = delay 1500 (NextSymbol "x")
+initialCmd = delay 500 NextSymbol
 
 init : () -> (Model, Cmd Msg)
 init _ = (initialModel, initialCmd)
@@ -37,18 +37,28 @@ delay : Float -> Msg -> Cmd Msg
 delay time msg =
   Task.perform (\_ -> msg) (Process.sleep time)
 
+infiniteSymbols : List String -> (String, List String)
+infiniteSymbols xs = let rest = List.drop 1 xs in
+  case List.head xs of
+    (Just x) -> (x, rest)
+    Nothing -> ("", rest)
+
+resetTemp : List String -> Model -> List String
+resetTemp xs model = if List.length xs == 0 then model.symbols else xs
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    (NextSymbol x) ->
+    NextSymbol -> let (x, rest) = infiniteSymbols model.tempSymbols in
       ({ model
-      | viewSymbols = x :: model.viewSymbols
-      }, delay (toFloat model.speed) (NextSymbol "x"))
+       | viewSymbols = x :: (take (Styles.stripeSize - 1) model.viewSymbols)
+       , tempSymbols = resetTemp rest model
+       }, delay (toFloat model.speed) NextSymbol)
+ 
+makeSymbol speed index s = (Styles.symbol index speed) [] [text s]
 
 view : Model -> Html Msg
 view model =
   Styles.stripe
-    [ css
-      [ transform (translateX (px 50)) ]
-    ]
-    ((List.map (\s -> div [] [text s]) model.viewSymbols) ++ [button [] [text "start"]])
+    []
+    (List.indexedMap (makeSymbol model.speed) model.viewSymbols)

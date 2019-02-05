@@ -48,7 +48,7 @@ update msg model =
           ({ model
           | symbolsListModel = { symbols = newSymbols }
           , addSymbolModel = updatedModel
-          , stripeModel = { stripeModel | symbols = newSymbols }
+          , stripeModel = { stripeModel | symbols = newSymbols, tempSymbols = stripeModel.tempSymbols ++ [symbol] }
           }, Cmd.none)
         (AddSymbol.InputChanged x) -> ({ model | addSymbolModel = updatedModel }, Cmd.none)
       (SymbolsListMsg subMsg) -> let updatedModel = SymbolsList.update subMsg symbolsListModel in case subMsg of
