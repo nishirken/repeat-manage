@@ -43,50 +43,58 @@ root =
     ]
 
 stripeSize = 7
+centerSize = 200
 
 stripe : List (Attribute msg) -> List (Html msg) -> Html msg
 stripe =
   styled section
     [ displayFlex
     , alignItems center
-    , justifyContent spaceBetween
-    , width (pct 100)
-    , minWidth (px 700)
+    , justifyContent center
+    , position relative
+    , width (px ((75 * 2) + (100 * 2) + (125 * 2) + 200))
     , minHeight (px 400)
-    , margin3 (px 100) auto (px 50)
-    , padding2 (px 0) (px 200)
+    , margin2 (px 0) auto
     , fontWeight (int 800)
+    , overflowX hidden
     ]
 
-calculateSize index =
+calculate : Int -> a -> a -> a -> a -> a
+calculate index fst snd third fourth =
   if index == 0 || index == (stripeSize - 1)
-    then 30
+    then fst
     else if index == 1 || index == 5
-      then 50
+      then snd
       else if index == 2 || index == 4
-        then 70
-        else 160
+        then third
+        else fourth
 
-calculateOpacity index = num <|
-  if index == 0 || index == (stripeSize - 1)
-    then 0.3
-    else if index == 1 || index == 5
-      then 0.5
-      else if index == 2 || index == 4
-        then 0.8
-        else 1.0
-
-calculateBorderColor index = if (remainderBy stripeSize 2) == (index - 1) then hex "000" else rgba 0 0 0 0
+calculateFontSize index = px <| calculate index 30 60 90 130
+calculateOpacity index = num <| calculate index 0.3 0.5 0.8 1.0
+calculateSize index = px <| calculate index 75 100 125 200
 
 symbol : Int -> Int -> List (Attribute msg) -> List (Html msg) -> Html msg
 symbol index speed =
   styled div
     [ displayFlex
     , alignItems center
-    , fontSize (px (calculateSize index))
-    , border3 (px 3) solid (calculateBorderColor index)
+    , justifyContent center
+    , minWidth (calculateSize index)
+    , height (calculateSize index)
+    , fontSize (calculateFontSize index)
     , opacity (calculateOpacity index)
     , Transitions.transition [Transitions.opacity3 ((toFloat speed) / 2) 0 Transitions.easeInOut]
+    ]
+
+centerBorder : List (Attribute msg) -> List (Html msg) -> Html msg
+centerBorder = let inCenter = (calc (pct 50) minus (px (centerSize / 2))) in
+  styled div
+    [ position absolute
+    , top inCenter
+    , left inCenter
+    , width (px centerSize)
+    , height (px centerSize)
+    , border3 (px 3) solid mainColor
     ]
 
 opacityTransition =
@@ -105,7 +113,7 @@ asideList =
       , width (px 200)
       , height (pct 100)
       , marginLeft auto
-      , marginTop (px 150)
+      , marginTop (px 50)
       ] opacityTransition)
 
 styledInput : List (Attribute msg) -> List (Html msg) -> Html msg

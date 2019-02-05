@@ -53,7 +53,15 @@ update msg model =
         (AddSymbol.InputChanged x) -> ({ model | addSymbolModel = updatedModel }, Cmd.none)
       (SymbolsListMsg subMsg) -> let updatedModel = SymbolsList.update subMsg symbolsListModel in case subMsg of
         (SymbolsList.DeleteSymbol symbol) ->
-          ({ model | symbolsListModel = updatedModel }, Cmd.none)
+          ({ model
+          | symbolsListModel = updatedModel
+          , stripeModel =
+            { stripeModel
+            | symbols = updatedModel.symbols
+            , tempSymbols = List.filter (\x -> x /= symbol) stripeModel.tempSymbols
+            , viewSymbols = List.filter (\x -> x /= symbol) stripeModel.viewSymbols
+            }
+          }, Cmd.none)
       (ChangeSpeedMsg subMsg) -> let updatedModel = ChangeSpeed.update subMsg changeSpeedModel in
         ({ model
         | changeSpeedModel = updatedModel

@@ -27,7 +27,7 @@ main = Browser.element
   , subscriptions = \_ -> Sub.none
   }
 
-initialModel = Model 0 [] [] []
+initialModel = Model 0 [] [] ["", "", "", "", "", ""]
 initialCmd = delay 500 NextSymbol
 
 init : () -> (Model, Cmd Msg)
@@ -56,9 +56,17 @@ update msg model =
        }, delay (toFloat model.speed) NextSymbol)
  
 makeSymbol speed index s = (Styles.symbol index speed) [] [text s]
+headWithDefault : List a -> a -> a
+headWithDefault xs defaultValue =
+  case head xs of
+    (Just x) -> x
+    Nothing -> defaultValue
 
 view : Model -> Html Msg
-view model =
+view model = let hiddenStub = makeSymbol model.speed 0 (headWithDefault model.viewSymbols "") in
   Styles.stripe
     []
-    (List.indexedMap (makeSymbol model.speed) model.viewSymbols)
+    ((Styles.centerBorder [] [])
+    :: [hiddenStub]
+    ++ (List.indexedMap (makeSymbol model.speed) model.viewSymbols)
+    ++ [hiddenStub])
