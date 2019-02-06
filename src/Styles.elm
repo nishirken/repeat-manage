@@ -6,6 +6,7 @@ import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (css, href, src, type_, rel)
 import Html.Styled.Events exposing (onClick)
 import Css.Transitions as Transitions
+import Css.Animations as Animations
 
 mainFont = "Sarabun"
 bgColor = hex "ffd54f"
@@ -48,16 +49,30 @@ centerSize = 200
 stripe : List (Attribute msg) -> List (Html msg) -> Html msg
 stripe =
   styled section
-    [ displayFlex
-    , alignItems center
-    , justifyContent center
-    , position relative
+    [ position relative
     , width (px ((75 * 2) + (100 * 2) + (125 * 2) + 200))
     , minHeight (px 400)
     , margin2 (px 0) auto
     , fontWeight (int 800)
     , overflowX hidden
     ]
+
+animationSpeed speed = if speed <= 500 then speed else 500
+
+innerSlider : Int -> List (Attribute msg) -> List (Html msg) -> Html msg
+innerSlider speed =
+  styled div
+    [ displayFlex
+    , alignItems center
+    , justifyContent center
+    , animationName slideShow
+    , animationDuration (ms (toFloat (animationSpeed speed)))
+    , animationIterationCount infinite
+    ]
+
+slideShow =
+  Animations.keyframes
+  [(0, [Animations.transform [translateX (px (-100))]]), (100, [Animations.transform [translateX (px 0)]])]
 
 calculate : Int -> a -> a -> a -> a -> a
 calculate index fst snd third fourth =
@@ -73,8 +88,8 @@ calculateFontSize index = px <| calculate index 30 60 90 130
 calculateOpacity index = num <| calculate index 0.3 0.5 0.8 1.0
 calculateSize index = px <| calculate index 75 100 125 200
 
-symbol : Int -> Int -> List (Attribute msg) -> List (Html msg) -> Html msg
-symbol index speed =
+symbol : Int -> List (Attribute msg) -> List (Html msg) -> Html msg
+symbol index =
   styled div
     [ displayFlex
     , alignItems center
@@ -83,7 +98,6 @@ symbol index speed =
     , height (calculateSize index)
     , fontSize (calculateFontSize index)
     , opacity (calculateOpacity index)
-    , Transitions.transition [Transitions.opacity3 ((toFloat speed) / 2) 0 Transitions.easeInOut]
     ]
 
 centerBorder : List (Attribute msg) -> List (Html msg) -> Html msg

@@ -63,10 +63,12 @@ headWithDefault xs defaultValue =
     Nothing -> defaultValue
 
 view : Model -> Html Msg
-view model = let hiddenStub = makeSymbol model.speed 0 (headWithDefault model.viewSymbols "") in
-  Styles.stripe
-    []
+view model =
+  let
+    firstStub = makeSymbol model.speed 0 (headWithDefault model.viewSymbols "")
+    lastStub = makeSymbol model.speed 0 (headWithDefault (reverse model.viewSymbols) "") in
+  (Styles.stripe model.speed)
+    [css [transform (translateX (px 0))]]
     ((Styles.centerBorder [] [])
-    :: [hiddenStub]
-    ++ (List.indexedMap (makeSymbol model.speed) model.viewSymbols)
-    ++ [hiddenStub])
+    :: [lastStub]
+    ++ (List.indexedMap (makeSymbol model.speed) model.viewSymbols))
