@@ -8,6 +8,9 @@ import AddSymbol
 import SymbolsList
 import Styles
 import ChangeSpeed
+import LocalStorage
+import Json.Encode as JE
+import Utils exposing (..)
 
 type alias Model =
   { stripeModel : Stripe.Model
@@ -21,6 +24,7 @@ type Msg
   | AddSymbolMsg AddSymbol.Msg
   | SymbolsListMsg SymbolsList.Msg
   | ChangeSpeedMsg ChangeSpeed.Msg
+  | LocalStorageMsg LocalStorage.Msg
 
 main = Browser.document
   { init = init
@@ -29,13 +33,16 @@ main = Browser.document
   , subscriptions = \_ -> Sub.none
   }
 
-init : () -> (Model, Cmd Msg)
-init _ = (
-  { stripeModel = let m = Stripe.initialModel in { m | speed = ChangeSpeed.initialSpeed }
+type alias Flags =
+  { storageState : String }
+
+init : Flags -> (Model, Cmd Msg)
+init { storageState } = let { speed, symbols } = (LocalStorage.decodeModel storageState) in (
+  { stripeModel = let m = Stripe.initialModel in { m | speed = speed, symbols = symbols }
   , addSymbolModel = AddSymbol.initialModel
-  , symbolsListModel = SymbolsList.initialModel
-  , changeSpeedModel = ChangeSpeed.initialModel
-  }, Cmd.batch [Cmd.map StripeMsg Stripe.initialCmd])
+  , symbolsListModel = let m = SymbolsList.initialModel in { m | symbols = symbols }
+  , changeSpeedModel = let m = ChangeSpeed.initialModel in { m | speed = speed }
+  }, Cmd.map StripeMsg Stripe.initialCmd)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
@@ -66,6 +73,13 @@ update msg model =
         | changeSpeedModel = updatedModel
         , stripeModel = { stripeModel | speed = updatedModel.speed }
         }, Cmd.none)
+      (LocalStorageMsg subMsg) -> case subMsg of
+        (LocalStorage.Loaded { speed, symbols }) ->
+          ({ model
+          | changeSpeedModel = { changeSpeedModel | speed = speed }
+          , stripeModel = { stripeModel | symbols = symbols }
+          , symbolsListModel = { symbolsListModel | symbols = symbols }
+          }, Cmd.none)
 
 view : Model -> Browser.Document Msg
 view { stripeModel, addSymbolModel, changeSpeedModel, symbolsListModel } =

@@ -15,7 +15,7 @@ type alias Model = { symbols : List String }
 
 type Msg = DeleteSymbol String
 
-initialModel = Model ["am"]
+initialModel = Model []
 
 update : Msg -> Model -> Model
 update msg model = case msg of

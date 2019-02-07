@@ -17,8 +17,8 @@ type alias Model =
 
 type Msg = Change Int
 
-initialSpeed = 1000
-initialModel = Model initialSpeed
+defaultSpeed = 3000
+initialModel = Model defaultSpeed
 
 update : Msg -> Model -> Model
 update msg model =
