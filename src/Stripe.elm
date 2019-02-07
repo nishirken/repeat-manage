@@ -11,6 +11,7 @@ import Task
 import List exposing (take, reverse, head)
 import Random
 import Array
+import Const exposing (sliderSize)
 
 type alias Model =
   { speed : Int
@@ -27,7 +28,7 @@ main = Browser.element
   , subscriptions = \_ -> Sub.none
   }
 
-initialModel = Model 0 [] (List.map (\_ -> "") (List.range 0 (Styles.stripeSize - 1)))
+initialModel = Model 0 [] (List.map (\_ -> "") (List.range 0 (sliderSize - 1)))
 initialCmd = delay 500 MakeRandom
 
 init : () -> (Model, Cmd Msg)
@@ -55,7 +56,7 @@ update msg model =
     MakeRandom -> (model, makeRandomSymbol model.symbols)
     (RandomGenerated x) ->
       ({ model
-      | viewSymbols = x :: (List.take (Styles.stripeSize - 1) model.viewSymbols)
+      | viewSymbols = x :: (List.take (sliderSize - 1) model.viewSymbols)
       }, delay (toFloat model.speed) MakeRandom)
 
 makeSymbol index s = (Styles.symbol index) [] [text s]
@@ -68,10 +69,10 @@ headWithDefault xs defaultValue =
 
 view : Model -> Html Msg
 view model =
-  Styles.stripe
+  Styles.slider
     []
     [ (Styles.innerSlider model.speed)
         []
-        (List.indexedMap makeSymbol model.viewSymbols)
+        ((List.indexedMap makeSymbol model.viewSymbols) ++ (List.indexedMap makeSymbol model.viewSymbols))
     , (Styles.centerBorder [] [])
     ]

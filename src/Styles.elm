@@ -7,6 +7,7 @@ import Html.Styled.Attributes exposing (css, href, src, type_, rel)
 import Html.Styled.Events exposing (onClick)
 import Css.Transitions as Transitions
 import Css.Animations as Animations
+import Const exposing (sliderSize)
 
 mainFont = "Sarabun"
 bgColor = hex "fff3e0"
@@ -43,16 +44,17 @@ root =
     , margin2 (px 0) auto
     ]
 
-stripeSize = 7
 centerSize = 200
+leftSize = 75
 
-stripe : List (Attribute msg) -> List (Html msg) -> Html msg
-stripe =
+slider : List (Attribute msg) -> List (Html msg) -> Html msg
+slider =
   styled section
     [ position relative
-    , width (px ((75 * 2) + (100 * 2) + (125 * 2) + 200))
-    , minHeight (px 400)
-    , margin2 (px 0) auto
+    , width (px ((leftSize * 2) + (100 * 2) + (125 * 2) + centerSize))
+    , minHeight (px 200)
+    , flexShrink (num 0)
+    , margin2 (px 100) auto
     , fontWeight (int 800)
     , overflowX hidden
     ]
@@ -64,17 +66,27 @@ innerSlider speed =
     , alignItems center
     , justifyContent center
     , animationName slideShow
-    , animationDuration (ms (toFloat speed))
-    , animationIterationCount (int 999999999999)
+    , animationDuration (ms (toFloat (speed * sliderSize)))
+    , property "animation-timing-function" "cubic-bezier(0.81, 0.18, 0.29, 1.01)"
+    -- animationTimingFunction doesn't exists
+    , property "animation-iteration-count" "infinite" -- can't resolve issue with type Infinite
     ]
 
 slideShow =
   Animations.keyframes
-  [(0, [Animations.transform [translateX (px (-100))]]), (100, [Animations.transform [translateX (px 0)]])]
+  [ (0, [Animations.transform [translateX (px 0)]])
+  , (14, [Animations.transform [translateX (px centerSize)]])
+  , (28, [Animations.transform [translateX (px (centerSize * 2))]])
+  , (43, [Animations.transform [translateX (px (centerSize * 3))]])
+  , (56, [Animations.transform [translateX (px (centerSize * 4))]])
+  , (70, [Animations.transform [translateX (px (centerSize * 5))]])
+  , (85, [Animations.transform [translateX (px (centerSize * 6))]])
+  , (100, [Animations.transform [translateX (px (centerSize * 7))]])
+  ]
 
 calculate : Int -> a -> a -> a -> a -> a
 calculate index fst snd third fourth =
-  if index == 0 || index == (stripeSize - 1)
+  if index == 0 || index == (sliderSize - 1)
     then fst
     else if index == 1 || index == 5
       then snd
@@ -84,7 +96,7 @@ calculate index fst snd third fourth =
 
 calculateFontSize index = px <| calculate index 30 60 90 130
 calculateOpacity index = num <| calculate index 0.3 0.5 0.8 1.0
-calculateSize index = px <| calculate index 75 100 125 200
+calculateSize index = px <| calculate index leftSize 100 125 centerSize
 
 symbol : Int -> List (Attribute msg) -> List (Html msg) -> Html msg
 symbol index =
@@ -92,10 +104,11 @@ symbol index =
     [ displayFlex
     , alignItems center
     , justifyContent center
-    , minWidth (calculateSize index)
-    , height (calculateSize index)
-    , fontSize (calculateFontSize index)
+    , minWidth (px centerSize)
+    , height (px centerSize)
+    , fontSize (px 130)
     , opacity (calculateOpacity index)
+    , paddingBottom (Css.em 0.3)
     ]
 
 centerBorder : List (Attribute msg) -> List (Html msg) -> Html msg
