@@ -67,7 +67,7 @@ innerSlider speed =
     , justifyContent center
     , animationName slideShow
     , animationDuration (ms (toFloat (animationSpeed speed)))
-    , animationIterationCount infinite
+    , animationIterationCount (num 5)
     ]
 
 slideShow =

@@ -55,7 +55,7 @@ update msg model =
        , tempSymbols = resetTemp rest model
        }, delay (toFloat model.speed) NextSymbol)
  
-makeSymbol speed index s = (Styles.symbol index speed) [] [text s]
+makeSymbol index s = (Styles.symbol index) [] [text s]
 headWithDefault : List a -> a -> a
 headWithDefault xs defaultValue =
   case head xs of
@@ -65,10 +65,12 @@ headWithDefault xs defaultValue =
 view : Model -> Html Msg
 view model =
   let
-    firstStub = makeSymbol model.speed 0 (headWithDefault model.viewSymbols "")
-    lastStub = makeSymbol model.speed 0 (headWithDefault (reverse model.viewSymbols) "") in
-  (Styles.stripe model.speed)
-    [css [transform (translateX (px 0))]]
-    ((Styles.centerBorder [] [])
-    :: [lastStub]
-    ++ (List.indexedMap (makeSymbol model.speed) model.viewSymbols))
+    firstStub = makeSymbol 0 (headWithDefault model.viewSymbols "")
+    lastStub = makeSymbol 0 (headWithDefault (reverse model.viewSymbols) "") in
+  Styles.stripe
+    []
+    [ (Styles.innerSlider model.speed)
+        [css [transform (translateX (px 0))]]
+        ([lastStub] ++ (List.indexedMap makeSymbol model.viewSymbols))
+    , (Styles.centerBorder [] [])
+    ]
