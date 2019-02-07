@@ -9,7 +9,7 @@ import Css.Transitions as Transitions
 import Css.Animations as Animations
 
 mainFont = "Sarabun"
-bgColor = hex "ffd54f"
+bgColor = hex "fff3e0"
 mainColor = hex "ff5722"
 sndColor = hex "ffecb3"
 
@@ -57,8 +57,6 @@ stripe =
     , overflowX hidden
     ]
 
-animationSpeed speed = if speed <= 500 then speed else 500
-
 innerSlider : Int -> List (Attribute msg) -> List (Html msg) -> Html msg
 innerSlider speed =
   styled div
@@ -66,8 +64,8 @@ innerSlider speed =
     , alignItems center
     , justifyContent center
     , animationName slideShow
-    , animationDuration (ms (toFloat (animationSpeed speed)))
-    , animationIterationCount (num 5)
+    , animationDuration (ms (toFloat speed))
+    , animationIterationCount (int 999999999999)
     ]
 
 slideShow =

@@ -9,16 +9,16 @@ import Styles
 import Process
 import Task
 import List exposing (take, reverse, head)
-import Time
+import Random
+import Array
 
 type alias Model =
   { speed : Int
   , symbols : List String
-  , tempSymbols : List String
   , viewSymbols : List String
   }
 
-type Msg = NextSymbol
+type Msg = RandomGenerated String | MakeRandom
 
 main = Browser.element
   { init = init
@@ -27,8 +27,8 @@ main = Browser.element
   , subscriptions = \_ -> Sub.none
   }
 
-initialModel = Model 0 [] [] ["", "", "", "", "", ""]
-initialCmd = delay 500 NextSymbol
+initialModel = Model 0 [] (List.map (\_ -> "") (List.range 0 (Styles.stripeSize - 1)))
+initialCmd = delay 500 MakeRandom
 
 init : () -> (Model, Cmd Msg)
 init _ = (initialModel, initialCmd)
@@ -37,40 +37,41 @@ delay : Float -> Msg -> Cmd Msg
 delay time msg =
   Task.perform (\_ -> msg) (Process.sleep time)
 
-infiniteSymbols : List String -> (String, List String)
-infiniteSymbols xs = let rest = List.drop 1 xs in
-  case List.head xs of
-    (Just x) -> (x, rest)
-    Nothing -> ("", rest)
-
 resetTemp : List String -> Model -> List String
 resetTemp xs model = if List.length xs == 0 then model.symbols else xs
+
+makeRandomSymbol : List String -> Cmd Msg
+makeRandomSymbol originalSymbols =
+  let maxIndex = (List.length originalSymbols) - 1
+      arraySymbols = Array.fromList originalSymbols
+      getByIndex i = case Array.get i arraySymbols of
+        (Just x) -> RandomGenerated x
+        Nothing -> RandomGenerated "" in
+    Random.generate getByIndex (Random.int 0 maxIndex)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    NextSymbol -> let (x, rest) = infiniteSymbols model.tempSymbols in
+    MakeRandom -> (model, makeRandomSymbol model.symbols)
+    (RandomGenerated x) ->
       ({ model
-       | viewSymbols = x :: (take (Styles.stripeSize - 1) model.viewSymbols)
-       , tempSymbols = resetTemp rest model
-       }, delay (toFloat model.speed) NextSymbol)
- 
+      | viewSymbols = x :: (List.take (Styles.stripeSize - 1) model.viewSymbols)
+      }, delay (toFloat model.speed) MakeRandom)
+
 makeSymbol index s = (Styles.symbol index) [] [text s]
+
 headWithDefault : List a -> a -> a
 headWithDefault xs defaultValue =
-  case head xs of
+  case List.head xs of
     (Just x) -> x
     Nothing -> defaultValue
 
 view : Model -> Html Msg
 view model =
-  let
-    firstStub = makeSymbol 0 (headWithDefault model.viewSymbols "")
-    lastStub = makeSymbol 0 (headWithDefault (reverse model.viewSymbols) "") in
   Styles.stripe
     []
     [ (Styles.innerSlider model.speed)
-        [css [transform (translateX (px 0))]]
-        ([lastStub] ++ (List.indexedMap makeSymbol model.viewSymbols))
+        []
+        (List.indexedMap makeSymbol model.viewSymbols)
     , (Styles.centerBorder [] [])
     ]
