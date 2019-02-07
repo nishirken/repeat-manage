@@ -4,7 +4,6 @@ import ChangeSpeed exposing (defaultSpeed)
 import Task
 import Json.Encode as JE
 import Json.Decode as JD
-import Utils
 
 type alias StoredModel =
   { speed : Int
@@ -30,7 +29,7 @@ modelDecoder =
 decodeModel : String -> StoredModel
 decodeModel value = case JD.decodeString modelDecoder value of
   (Ok x) -> x
-  (Err _) -> Utils.withLog(defaultModel)
+  (Err _) -> defaultModel
 
 key = "repeatManage"
 
