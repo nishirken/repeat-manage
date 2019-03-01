@@ -12,13 +12,16 @@ type alias StoredModel =
 
 type Msg = Loaded StoredModel
 
-port setStorage : StoredModel -> Cmd msg
+port setStorage : JE.Value -> Cmd msg
 
 encodedModel : StoredModel -> JE.Value
 encodedModel { speed, symbols } = JE.object
   [ ("speed", JE.int speed)
   , ("symbols", JE.list JE.string symbols)
   ]
+
+writeModel : StoredModel -> Cmd msg
+writeModel model = setStorage (encodedModel model)
 
 modelDecoder : JD.Decoder StoredModel
 modelDecoder =

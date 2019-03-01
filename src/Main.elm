@@ -46,8 +46,10 @@ init { storageState } = let { speed, symbols } = (LocalStorage.decodeModel stora
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  let { sliderModel, addSymbolModel, symbolsListModel, changeSpeedModel } = model in
-    case msg of
+  let
+    { sliderModel, addSymbolModel, symbolsListModel, changeSpeedModel } = model
+    writeToLocalStorage speed symbols = LocalStorage.writeModel (LocalStorage.StoredModel speed symbols)
+    in case msg of
       (SliderMsg subMsg) -> let (updatedModel, updatedCmd) = Slider.update subMsg sliderModel in
         ({ model | sliderModel = updatedModel }, Cmd.map SliderMsg updatedCmd)
       (AddSymbolMsg subMsg) -> let updatedModel = AddSymbol.update subMsg addSymbolModel in case subMsg of
@@ -56,7 +58,7 @@ update msg model =
           | symbolsListModel = { symbols = newSymbols }
           , addSymbolModel = updatedModel
           , sliderModel = { sliderModel | symbols = newSymbols }
-          }, Cmd.none)
+          }, writeToLocalStorage changeSpeedModel.speed newSymbols)
         (AddSymbol.InputChanged x) -> ({ model | addSymbolModel = updatedModel }, Cmd.none)
       (SymbolsListMsg subMsg) -> let updatedModel = SymbolsList.update subMsg symbolsListModel in case subMsg of
         (SymbolsList.DeleteSymbol symbol) ->
@@ -67,12 +69,12 @@ update msg model =
             | symbols = updatedModel.symbols
             , viewSymbols = List.filter (\x -> x /= symbol) sliderModel.viewSymbols
             }
-          }, Cmd.none)
+          }, writeToLocalStorage changeSpeedModel.speed updatedModel.symbols)
       (ChangeSpeedMsg subMsg) -> let updatedModel = ChangeSpeed.update subMsg changeSpeedModel in
         ({ model
         | changeSpeedModel = updatedModel
         , sliderModel = { sliderModel | speed = updatedModel.speed }
-        }, Cmd.none)
+        }, writeToLocalStorage updatedModel.speed symbolsListModel.symbols)
       (LocalStorageMsg subMsg) -> case subMsg of
         (LocalStorage.Loaded { speed, symbols }) ->
           ({ model
