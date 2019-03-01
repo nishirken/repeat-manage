@@ -51,7 +51,7 @@ slider : List (Attribute msg) -> List (Html msg) -> Html msg
 slider =
   styled section
     [ position relative
-    , width (px ((leftSize * 2) + (100 * 2) + (125 * 2) + centerSize))
+    , width (px (centerSize * sliderSize))
     , minHeight (px 200)
     , flexShrink (num 0)
     , margin2 (px 100) auto
@@ -65,38 +65,12 @@ innerSlider speed =
     [ displayFlex
     , alignItems center
     , justifyContent center
-    , animationName slideShow
-    , animationDuration (ms (toFloat (speed * sliderSize)))
-    , property "animation-timing-function" "cubic-bezier(0.81, 0.18, 0.29, 1.01)"
-    -- animationTimingFunction doesn't exists
-    , property "animation-iteration-count" "infinite" -- can't resolve issue with type Infinite
+    , transform (translateX (px (centerSize / 2)))
     ]
 
-slideShow =
-  Animations.keyframes
-  [ (0, [Animations.transform [translateX (px 0)]])
-  , (14, [Animations.transform [translateX (px centerSize)]])
-  , (28, [Animations.transform [translateX (px (centerSize * 2))]])
-  , (43, [Animations.transform [translateX (px (centerSize * 3))]])
-  , (56, [Animations.transform [translateX (px (centerSize * 4))]])
-  , (70, [Animations.transform [translateX (px (centerSize * 5))]])
-  , (85, [Animations.transform [translateX (px (centerSize * 6))]])
-  , (100, [Animations.transform [translateX (px (centerSize * 7))]])
-  ]
-
-calculate : Int -> a -> a -> a -> a -> a
-calculate index fst snd third fourth =
-  if index == 0 || index == (sliderSize - 1)
-    then fst
-    else if index == 1 || index == 5
-      then snd
-      else if index == 2 || index == 4
-        then third
-        else fourth
-
-calculateFontSize index = px <| calculate index 30 60 90 130
-calculateOpacity index = num <| calculate index 0.3 0.5 0.8 1.0
-calculateSize index = px <| calculate index leftSize 100 125 centerSize
+calculate index fstVal sndVal = if index == (sliderSize - (sliderSize // 2)) then fstVal else sndVal
+calculateFontSize index = px <| calculate index 130 90
+calculateOpacity index = num <| calculate index 1.0 0.6
 
 symbol : Int -> List (Attribute msg) -> List (Html msg) -> Html msg
 symbol index =
@@ -106,9 +80,9 @@ symbol index =
     , justifyContent center
     , minWidth (px centerSize)
     , height (px centerSize)
-    , fontSize (px 130)
-    , opacity (calculateOpacity index)
+    , fontSize (calculateFontSize index)
     , paddingBottom (Css.em 0.3)
+    , opacity (calculateOpacity index)
     ]
 
 centerBorder : List (Attribute msg) -> List (Html msg) -> Html msg

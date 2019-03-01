@@ -3,7 +3,7 @@ import Html.Styled exposing (..)
 import Html.Styled.Events exposing (..)
 import Html.Styled.Attributes exposing (class, href, rel)
 import Browser
-import Stripe
+import Slider
 import AddSymbol
 import SymbolsList
 import Styles
@@ -13,14 +13,14 @@ import Json.Encode as JE
 import Utils exposing (..)
 
 type alias Model =
-  { stripeModel : Stripe.Model
+  { sliderModel : Slider.Model
   , addSymbolModel : AddSymbol.Model
   , symbolsListModel : SymbolsList.Model
   , changeSpeedModel : ChangeSpeed.Model
   }
 
 type Msg
-  = StripeMsg Stripe.Msg
+  = SliderMsg Slider.Msg
   | AddSymbolMsg AddSymbol.Msg
   | SymbolsListMsg SymbolsList.Msg
   | ChangeSpeedMsg ChangeSpeed.Msg
@@ -38,57 +38,57 @@ type alias Flags =
 
 init : Flags -> (Model, Cmd Msg)
 init { storageState } = let { speed, symbols } = (LocalStorage.decodeModel storageState) in (
-  { stripeModel = let m = Stripe.initialModel in { m | speed = speed, symbols = symbols }
+  { sliderModel = let m = Slider.initialModel in { m | speed = speed, symbols = symbols }
   , addSymbolModel = AddSymbol.initialModel
   , symbolsListModel = let m = SymbolsList.initialModel in { m | symbols = symbols }
   , changeSpeedModel = let m = ChangeSpeed.initialModel in { m | speed = speed }
-  }, Cmd.map StripeMsg Stripe.initialCmd)
+  }, Cmd.map SliderMsg Slider.initialCmd)
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  let { stripeModel, addSymbolModel, symbolsListModel, changeSpeedModel } = model in
+  let { sliderModel, addSymbolModel, symbolsListModel, changeSpeedModel } = model in
     case msg of
-      (StripeMsg subMsg) -> let (updatedModel, updatedCmd) = Stripe.update subMsg stripeModel in
-        ({ model | stripeModel = updatedModel }, Cmd.map StripeMsg updatedCmd)
+      (SliderMsg subMsg) -> let (updatedModel, updatedCmd) = Slider.update subMsg sliderModel in
+        ({ model | sliderModel = updatedModel }, Cmd.map SliderMsg updatedCmd)
       (AddSymbolMsg subMsg) -> let updatedModel = AddSymbol.update subMsg addSymbolModel in case subMsg of
         (AddSymbol.AddSymbol symbol) -> let newSymbols = symbolsListModel.symbols ++ [symbol] in
           ({ model
           | symbolsListModel = { symbols = newSymbols }
           , addSymbolModel = updatedModel
-          , stripeModel = { stripeModel | symbols = newSymbols }
+          , sliderModel = { sliderModel | symbols = newSymbols }
           }, Cmd.none)
         (AddSymbol.InputChanged x) -> ({ model | addSymbolModel = updatedModel }, Cmd.none)
       (SymbolsListMsg subMsg) -> let updatedModel = SymbolsList.update subMsg symbolsListModel in case subMsg of
         (SymbolsList.DeleteSymbol symbol) ->
           ({ model
           | symbolsListModel = updatedModel
-          , stripeModel =
-            { stripeModel
+          , sliderModel =
+            { sliderModel
             | symbols = updatedModel.symbols
-            , viewSymbols = List.filter (\x -> x /= symbol) stripeModel.viewSymbols
+            , viewSymbols = List.filter (\x -> x /= symbol) sliderModel.viewSymbols
             }
           }, Cmd.none)
       (ChangeSpeedMsg subMsg) -> let updatedModel = ChangeSpeed.update subMsg changeSpeedModel in
         ({ model
         | changeSpeedModel = updatedModel
-        , stripeModel = { stripeModel | speed = updatedModel.speed }
+        , sliderModel = { sliderModel | speed = updatedModel.speed }
         }, Cmd.none)
       (LocalStorageMsg subMsg) -> case subMsg of
         (LocalStorage.Loaded { speed, symbols }) ->
           ({ model
           | changeSpeedModel = { changeSpeedModel | speed = speed }
-          , stripeModel = { stripeModel | symbols = symbols }
+          , sliderModel = { sliderModel | symbols = symbols }
           , symbolsListModel = { symbolsListModel | symbols = symbols }
           }, Cmd.none)
 
 view : Model -> Browser.Document Msg
-view { stripeModel, addSymbolModel, changeSpeedModel, symbolsListModel } =
+view { sliderModel, addSymbolModel, changeSpeedModel, symbolsListModel } =
   { title = "Repeat"
   , body = List.map Html.Styled.toUnstyled
     [ Styles.globalStyles
     , Styles.root []
       [ Html.Styled.map ChangeSpeedMsg (ChangeSpeed.view changeSpeedModel)
-      , Html.Styled.map StripeMsg (Stripe.view stripeModel)
+      , Html.Styled.map SliderMsg (Slider.view sliderModel)
       , Styles.asideList []
           [ Html.Styled.map AddSymbolMsg (AddSymbol.view addSymbolModel)
           , Html.Styled.map SymbolsListMsg (SymbolsList.view symbolsListModel)

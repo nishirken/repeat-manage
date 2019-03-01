@@ -1,3 +1,3 @@
 module Const exposing (..)
 
-sliderSize = 7
+sliderSize = 5

@@ -10,12 +10,9 @@
 </head>
 <body>
   <script>
-    const key = 'repeatManage';
+    const key = 'repeat-manage';
     const unParsedStoredState = localStorage.getItem(key) || "";
     const app = Elm.Main.init({ flags: { storageState: unParsedStoredState } });
-    // app.ports.setStorage.subscribe(stringifiedState => {
-    //     localStorage.setItem(key, stringifiedState);
-    // });
   </script>
 </body>
 </html>
