@@ -67,16 +67,18 @@ fromIndex xs i = case Array.get i (Array.fromList xs) of
 randomIndex : List a -> Random.Generator Int
 randomIndex xs = let (fst, snd) = ranges xs in Random.int fst snd
 
-makeRandomSymbol : List String -> Cmd Msg
-makeRandomSymbol originalSymbols =
-  Random.generate (\i -> RandomGenerated (fromIndex originalSymbols i)) (randomIndex originalSymbols)
+makeRandomSymbol : List String -> Int -> Cmd Msg
+makeRandomSymbol originalSymbols speed =
+  if List.length originalSymbols < sliderSize
+    then delay 0 MakeInitialList
+    else Random.generate (\i -> RandomGenerated (fromIndex originalSymbols i)) (randomIndex originalSymbols)
 
-makeInitialRandomList : List String -> Cmd Msg
-makeInitialRandomList originalSymbols =
+makeInitialRandomList : List String -> Int -> Cmd Msg
+makeInitialRandomList originalSymbols speed =
   let (fst, snd) = ranges originalSymbols in
     if List.length originalSymbols == 0
-      then Cmd.none
-      else let generatedList = Random.list ((List.length originalSymbols) * 2) (randomIndex originalSymbols) in
+      then delay (toFloat speed) MakeInitialList
+      else let generatedList = Random.list sliderSize (randomIndex originalSymbols) in
         Random.generate
           (\xs -> InitialRandomListGenerated (List.map (\index -> fromIndex originalSymbols index) xs))
           generatedList
@@ -84,8 +86,8 @@ makeInitialRandomList originalSymbols =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    MakeInitialList -> (model, makeInitialRandomList model.symbols)
-    MakeRandom -> (model, makeRandomSymbol model.symbols)
+    MakeInitialList -> (model, makeInitialRandomList model.symbols model.speed)
+    MakeRandom -> (model, makeRandomSymbol model.symbols model.speed)
     (RandomGenerated x) ->
       ({ model | viewSymbols = x :: (List.take ((List.length model.viewSymbols) - 1) model.viewSymbols) }
       , delay (toFloat model.speed) MakeRandom)

@@ -65,10 +65,9 @@ innerSlider speed =
     [ displayFlex
     , alignItems center
     , justifyContent center
-    , transform (translateX (px (centerSize / 2)))
     ]
 
-calculate index fstVal sndVal = if index == (sliderSize - (sliderSize // 2)) then fstVal else sndVal
+calculate index fstVal sndVal = if index == (sliderSize - (sliderSize // 2) - 1) then fstVal else sndVal
 calculateFontSize index = px <| calculate index 130 90
 calculateOpacity index = num <| calculate index 1.0 0.6
 
