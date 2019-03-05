@@ -4,13 +4,7 @@ import ChangeSpeed exposing (defaultSpeed)
 import Task
 import Json.Encode as JE
 import Json.Decode as JD
-
-type alias StoredModel =
-  { speed : Int
-  , symbols : List String
-  }
-
-type Msg = Loaded StoredModel
+import Common exposing (StoredModel)
 
 port setStorage : JE.Value -> Cmd msg
 

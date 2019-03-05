@@ -10,7 +10,7 @@ import Styles
 import ChangeSpeed
 import LocalStorage
 import Json.Encode as JE
-import Utils exposing (..)
+import Common exposing (GlobalMsg (..), StoredModel)
 
 type alias Model =
   { sliderModel : Slider.Model
@@ -24,7 +24,6 @@ type Msg
   | AddSymbolMsg AddSymbol.Msg
   | SymbolsListMsg SymbolsList.Msg
   | ChangeSpeedMsg ChangeSpeed.Msg
-  | LocalStorageMsg LocalStorage.Msg
 
 main = Browser.document
   { init = init
@@ -44,44 +43,66 @@ init { storageState } = let { speed, symbols } = (LocalStorage.decodeModel stora
   , changeSpeedModel = let m = ChangeSpeed.initialModel in { m | speed = speed }
   }, Cmd.map SliderMsg Slider.initialCmd)
 
+updateInnerMsg : Msg -> Model -> (Model, Cmd Msg)
+updateInnerMsg msg model =
+  let
+    { sliderModel, addSymbolModel, symbolsListModel, changeSpeedModel } = model in
+    case msg of
+      (SliderMsg subMsg) ->
+        let (updatedModel, updatedCmd) = Slider.update subMsg sliderModel in
+          ({ model | sliderModel = updatedModel }, Cmd.map SliderMsg updatedCmd)
+      (AddSymbolMsg subMsg) ->
+        let updatedModel = AddSymbol.update subMsg addSymbolModel in
+          ({ model | addSymbolModel = updatedModel }, Cmd.none)
+      (SymbolsListMsg subMsg) ->
+        let updatedModel = SymbolsList.update subMsg symbolsListModel in
+          ({ model | symbolsListModel = updatedModel }, Cmd.none)
+      (ChangeSpeedMsg subMsg) ->
+        let updatedModel = ChangeSpeed.update subMsg changeSpeedModel in
+          ({ model | changeSpeedModel = updatedModel }, Cmd.none)
+
+updateOutModel : GlobalMsg -> Model -> Model
+updateOutModel globalMsg model =
+  { model
+  | sliderModel = Slider.updateOutMsg globalMsg model.sliderModel
+  , symbolsListModel = SymbolsList.updateOutMsg globalMsg model.symbolsListModel
+  }
+
+updateOutCmd : GlobalMsg -> Model -> Cmd Msg
+updateOutCmd msg { sliderModel, symbolsListModel, changeSpeedModel } =
+  let writeToLocalStorage = LocalStorage.writeModel (StoredModel changeSpeedModel.speed symbolsListModel.symbols) in
+    case msg of
+      (AddSymbol _) -> writeToLocalStorage
+      (DeleteSymbol x) -> Cmd.batch [writeToLocalStorage, Cmd.map SliderMsg (Slider.updateOutCmd (DeleteSymbol x) sliderModel)]
+      (ChangeSpeed _) -> writeToLocalStorage
+      _ -> Cmd.none
+
+updateOutMsg : Msg -> Model -> (Model, Cmd Msg)
+updateOutMsg msg model =
+  case msg of
+    (SymbolsListMsg subMsg) ->
+      let
+        msg_ = SymbolsList.outMsg subMsg
+        model_ = updateOutModel msg_ model in
+      (model_, updateOutCmd msg_ model_)
+    (AddSymbolMsg subMsg) ->
+      let
+        msg_ = AddSymbol.outMsg subMsg
+        model_ = updateOutModel msg_ model in
+      (model_, updateOutCmd msg_ model_)
+    (ChangeSpeedMsg subMsg) ->
+      let
+        msg_ = ChangeSpeed.outMsg subMsg
+        model_ = updateOutModel msg_ model in
+      (model_, updateOutCmd msg_ model_)
+    _ -> (model, Cmd.none)
+
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   let
-    { sliderModel, addSymbolModel, symbolsListModel, changeSpeedModel } = model
-    writeToLocalStorage speed symbols = LocalStorage.writeModel (LocalStorage.StoredModel speed symbols)
-    in case msg of
-      (SliderMsg subMsg) -> let (updatedModel, updatedCmd) = Slider.update subMsg sliderModel in
-        ({ model | sliderModel = updatedModel }, Cmd.map SliderMsg updatedCmd)
-      (AddSymbolMsg subMsg) -> let updatedModel = AddSymbol.update subMsg addSymbolModel in case subMsg of
-        (AddSymbol.AddSymbol symbol) -> let newSymbols = symbolsListModel.symbols ++ [symbol] in
-          ({ model
-          | symbolsListModel = { symbols = newSymbols }
-          , addSymbolModel = updatedModel
-          , sliderModel = { sliderModel | symbols = newSymbols }
-          }, writeToLocalStorage changeSpeedModel.speed newSymbols)
-        (AddSymbol.InputChanged x) -> ({ model | addSymbolModel = updatedModel }, Cmd.none)
-      (SymbolsListMsg subMsg) -> let updatedModel = SymbolsList.update subMsg symbolsListModel in case subMsg of
-        (SymbolsList.DeleteSymbol symbol) ->
-          ({ model
-          | symbolsListModel = updatedModel
-          , sliderModel =
-            { sliderModel
-            | symbols = updatedModel.symbols
-            , viewSymbols = List.filter (\x -> x /= symbol) sliderModel.viewSymbols
-            }
-          }, writeToLocalStorage changeSpeedModel.speed updatedModel.symbols)
-      (ChangeSpeedMsg subMsg) -> let updatedModel = ChangeSpeed.update subMsg changeSpeedModel in
-        ({ model
-        | changeSpeedModel = updatedModel
-        , sliderModel = { sliderModel | speed = updatedModel.speed }
-        }, writeToLocalStorage updatedModel.speed symbolsListModel.symbols)
-      (LocalStorageMsg subMsg) -> case subMsg of
-        (LocalStorage.Loaded { speed, symbols }) ->
-          ({ model
-          | changeSpeedModel = { changeSpeedModel | speed = speed }
-          , sliderModel = { sliderModel | symbols = symbols }
-          , symbolsListModel = { symbolsListModel | symbols = symbols }
-          }, Cmd.none)
+    (innerModel, innerCmd) = updateInnerMsg msg model
+    (outModel, outCmd) = updateOutMsg msg innerModel in
+      (outModel, Cmd.batch [outCmd, innerCmd])
 
 view : Model -> Browser.Document Msg
 view { sliderModel, addSymbolModel, changeSpeedModel, symbolsListModel } =

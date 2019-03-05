@@ -11,8 +11,7 @@ import Task
 import List exposing (take, reverse, head)
 import Random
 import Array
-import Const exposing (sliderSize)
-import Utils
+import Common exposing (GlobalMsg (..), sliderSize)
 import DOM
 
 type alias Model =
@@ -24,7 +23,8 @@ type alias Model =
 
 type Msg
   = RandomGenerated String
-  | InitialRandomListGenerated (List String)
+  | FullListGenerated (List String)
+  | PartOfListGenerated (List String)
   | MakeRandom
   | MakeInitialList
 
@@ -43,7 +43,7 @@ type alias SliderMsg =
 
 innerSliderId = "slider"
 
-initialModel = Model 0 [] (List.map (\_ -> "") (List.range 0 ((sliderSize * 2) - 1))) ""
+initialModel = Model 0 [] (List.map (\_ -> "") (List.range 0 (sliderSize - 1))) ""
 initialCmd = delay 500 MakeInitialList
 
 init : () -> (Model, Cmd Msg)
@@ -67,31 +67,47 @@ fromIndex xs i = case Array.get i (Array.fromList xs) of
 randomIndex : List a -> Random.Generator Int
 randomIndex xs = let (fst, snd) = ranges xs in Random.int fst snd
 
-makeRandomSymbol : List String -> Int -> Cmd Msg
-makeRandomSymbol originalSymbols speed =
-  if List.length originalSymbols < sliderSize
-    then delay 0 MakeInitialList
-    else Random.generate (\i -> RandomGenerated (fromIndex originalSymbols i)) (randomIndex originalSymbols)
+makeRandomSymbol : List String -> Cmd Msg
+makeRandomSymbol originalSymbols =
+  Random.generate (\i -> RandomGenerated (fromIndex originalSymbols i)) (randomIndex originalSymbols)
 
-makeInitialRandomList : List String -> Int -> Cmd Msg
-makeInitialRandomList originalSymbols speed =
-  let (fst, snd) = ranges originalSymbols in
-    if List.length originalSymbols == 0
-      then delay (toFloat speed) MakeInitialList
-      else let generatedList = Random.list sliderSize (randomIndex originalSymbols) in
-        Random.generate
-          (\xs -> InitialRandomListGenerated (List.map (\index -> fromIndex originalSymbols index) xs))
-          generatedList
+makeRandomList : List String -> ((List String) -> Msg) -> Int -> Cmd Msg
+makeRandomList originalSymbols msg howMuch =
+  let generatedList = Random.list howMuch (randomIndex originalSymbols) in
+    Random.generate
+      (\xs -> msg (List.map (\index -> fromIndex originalSymbols index) xs))
+      generatedList
+
+updateOutMsg : GlobalMsg -> Model -> Model
+updateOutMsg globalMsg model = case globalMsg of
+  (DeleteSymbol x) -> let clearList = List.filter (\s -> s /= x) in
+    { model
+    | symbols = clearList model.symbols
+    , viewSymbols = clearList model.viewSymbols
+    }
+  (AddSymbol x) ->
+    { model
+    | symbols = x :: model.symbols
+    }
+  (ChangeSpeed x) -> { model | speed = x }
+  _ -> model
+
+updateOutCmd : GlobalMsg -> Model -> Cmd Msg
+updateOutCmd msg model =
+  case msg of
+    (DeleteSymbol x) -> makeRandomList model.symbols PartOfListGenerated (sliderSize - (List.length model.viewSymbols))
+    _ -> Cmd.none
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =
+update msg model = let delayRandomCmd = delay (toFloat model.speed) MakeRandom in
   case msg of
-    MakeInitialList -> (model, makeInitialRandomList model.symbols model.speed)
-    MakeRandom -> (model, makeRandomSymbol model.symbols model.speed)
+    MakeInitialList -> (model, Cmd.batch [makeRandomList model.symbols FullListGenerated sliderSize])
+    MakeRandom -> (model, makeRandomSymbol model.symbols)
     (RandomGenerated x) ->
       ({ model | viewSymbols = x :: (List.take ((List.length model.viewSymbols) - 1) model.viewSymbols) }
-      , delay (toFloat model.speed) MakeRandom)
-    (InitialRandomListGenerated xs) -> ({ model | viewSymbols = xs }, delay (toFloat model.speed) MakeRandom)
+      , delayRandomCmd)
+    (FullListGenerated xs) -> ({ model | viewSymbols = xs }, delayRandomCmd)
+    (PartOfListGenerated xs) -> ({ model | viewSymbols = xs ++ model.viewSymbols }, delayRandomCmd)
 
 makeSymbol : Int -> String -> Html msg
 makeSymbol index s = Styles.symbol index [] [text s]

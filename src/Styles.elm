@@ -7,7 +7,7 @@ import Html.Styled.Attributes exposing (css, href, src, type_, rel)
 import Html.Styled.Events exposing (onClick)
 import Css.Transitions as Transitions
 import Css.Animations as Animations
-import Const exposing (sliderSize)
+import Common exposing (sliderSize)
 
 mainFont = "Sarabun"
 bgColor = hex "fff3e0"

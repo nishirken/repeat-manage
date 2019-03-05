@@ -5,6 +5,7 @@ import Html.Styled exposing (..)
 import Html.Styled.Attributes exposing (type_, value)
 import Html.Styled.Events exposing (onInput)
 import Styles
+import Common
 
 main = Browser.sandbox
   { init = initialModel
@@ -19,6 +20,11 @@ type Msg = Change Int
 
 defaultSpeed = 3000
 initialModel = Model defaultSpeed
+
+outMsg : Msg -> Common.GlobalMsg
+outMsg msg =
+  case msg of
+    (Change x) -> Common.ChangeSpeed x
 
 update : Msg -> Model -> Model
 update msg model =
