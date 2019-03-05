@@ -24,7 +24,7 @@ globalStyles = GlobalCss.global
   [ GlobalCss.everything reset
   , GlobalCss.body [
     displayFlex
-    , height (pct 100)
+    , minHeight (pct 100)
     , color (hex "000")
     , backgroundColor bgColor
     , fontFamilies [mainFont]
