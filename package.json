@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "elm-live": "^3.4.0"
+    "elm": "^0.19.0-bugfix6",
+    "elm-live": "^3.4.0",
+    "koa": "^2.7.0",
+    "koa-static": "^5.0.0"
   },
   "devDependencies": {},
   "scripts": {
@@ -15,7 +18,7 @@
     "url": "git+https://github.com/nishirken/repeat-manage.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Dmitrii Skurikhin",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/nishirken/repeat-manage/issues"
