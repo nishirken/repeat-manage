@@ -8,10 +8,10 @@ const app = new Koa();
 app.use(ctx => {
   if (ctx.request.url === '/') {
     ctx.type = 'text/html';
-    ctx.body = fs.readFileSync('./custom.html', { encoding: 'UTF8' });
+    ctx.body = fs.readFileSync(__dirname + '/custom.html', { encoding: 'UTF8' });
   } else if (ctx.request.url === '/dist/elm.js') {
     ctx.type = 'application/javascript';
-    ctx.body = fs.readFileSync('./dist/elm.js', { encoding: 'UTF8' });
+    ctx.body = fs.readFileSync(__dirname + '/dist/elm.js', { encoding: 'UTF8' });
   } else {
     ctx.status = 404;
   }
