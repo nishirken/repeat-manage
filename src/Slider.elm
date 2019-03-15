@@ -107,7 +107,7 @@ update msg model = let delayRandomCmd = delay (toFloat model.speed) MakeRandom i
       ({ model | viewSymbols = x :: (List.take ((List.length model.viewSymbols) - 1) model.viewSymbols) }
       , delayRandomCmd)
     (FullListGenerated xs) -> ({ model | viewSymbols = xs }, delayRandomCmd)
-    (PartOfListGenerated xs) -> ({ model | viewSymbols = xs ++ model.viewSymbols }, delayRandomCmd)
+    (PartOfListGenerated xs) -> ({ model | viewSymbols = xs ++ model.viewSymbols }, Cmd.none)
 
 makeSymbol : Int -> String -> Html msg
 makeSymbol index s = Styles.symbol index [] [text s]

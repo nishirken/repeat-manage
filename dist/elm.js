@@ -5575,6 +5575,7 @@ var elm$core$List$take = F2(
 		return A3(elm$core$List$takeFast, 0, n, list);
 	});
 var elm$core$Platform$Cmd$batch = _Platform_batch;
+var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Slider$update = F2(
 	function (msg, model) {
 		var delayRandomCmd = A2(author$project$Slider$delay, model.speed, author$project$Slider$MakeRandom);
@@ -5621,7 +5622,7 @@ var author$project$Slider$update = F2(
 						{
 							viewSymbols: _Utils_ap(xs, model.viewSymbols)
 						}),
-					delayRandomCmd);
+					elm$core$Platform$Cmd$none);
 		}
 	});
 var elm$core$Basics$neq = _Utils_notEqual;
@@ -5648,7 +5649,6 @@ var author$project$SymbolsList$update = F2(
 				model.symbols)
 		};
 	});
-var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var author$project$Main$updateInnerMsg = F2(
 	function (msg, model) {
 		var _n0 = model;
