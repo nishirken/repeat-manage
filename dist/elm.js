@@ -5132,8 +5132,12 @@ var author$project$AddSymbol$update = F2(
 	});
 var author$project$ChangeSpeed$update = F2(
 	function (msg, model) {
-		var x = msg.a;
-		return {speed: x};
+		if (msg.$ === 'Change') {
+			var x = msg.a;
+			return {speed: x};
+		} else {
+			return model;
+		}
 	});
 var author$project$Slider$FullListGenerated = function (a) {
 	return {$: 'FullListGenerated', a: a};
@@ -5708,10 +5712,14 @@ var author$project$AddSymbol$outMsg = function (msg) {
 var author$project$Common$ChangeSpeed = function (a) {
 	return {$: 'ChangeSpeed', a: a};
 };
-var author$project$ChangeSpeed$outMsg = function (msg) {
-	var x = msg.a;
-	return author$project$Common$ChangeSpeed(x);
-};
+var author$project$ChangeSpeed$outMsg = F2(
+	function (msg, model) {
+		if (msg.$ === 'Blur') {
+			return author$project$Common$ChangeSpeed(model.speed);
+		} else {
+			return author$project$Common$None;
+		}
+	});
 var author$project$Common$DeleteSymbol = function (a) {
 	return {$: 'DeleteSymbol', a: a};
 };
@@ -5880,7 +5888,7 @@ var author$project$Main$updateOutMsg = F2(
 					A2(author$project$Main$updateOutCmd, msg_, model_));
 			case 'ChangeSpeedMsg':
 				var subMsg = msg.a;
-				var msg_ = author$project$ChangeSpeed$outMsg(subMsg);
+				var msg_ = A2(author$project$ChangeSpeed$outMsg, subMsg, model.changeSpeedModel);
 				var model_ = A2(author$project$Main$updateOutModel, msg_, model);
 				return _Utils_Tuple2(
 					model_,
@@ -8388,6 +8396,7 @@ var author$project$AddSymbol$view = function (model) {
 					]))
 			]));
 };
+var author$project$ChangeSpeed$Blur = {$: 'Blur'};
 var author$project$ChangeSpeed$Change = function (a) {
 	return {$: 'Change', a: a};
 };
@@ -8754,6 +8763,12 @@ var rtfeldman$elm_css$Html$Styled$Attributes$stringProperty = F2(
 	});
 var rtfeldman$elm_css$Html$Styled$Attributes$type_ = rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('type');
 var rtfeldman$elm_css$Html$Styled$Attributes$value = rtfeldman$elm_css$Html$Styled$Attributes$stringProperty('value');
+var rtfeldman$elm_css$Html$Styled$Events$onBlur = function (msg) {
+	return A2(
+		rtfeldman$elm_css$Html$Styled$Events$on,
+		'blur',
+		elm$json$Json$Decode$succeed(msg));
+};
 var author$project$ChangeSpeed$view = function (model) {
 	return A2(
 		rtfeldman$elm_css$Html$Styled$div,
@@ -8769,6 +8784,7 @@ var author$project$ChangeSpeed$view = function (model) {
 						function (x) {
 							return A2(author$project$ChangeSpeed$onInputChange, x, model.speed);
 						}),
+						rtfeldman$elm_css$Html$Styled$Events$onBlur(author$project$ChangeSpeed$Blur),
 						rtfeldman$elm_css$Html$Styled$Attributes$value(
 						elm$core$String$fromInt(model.speed))
 					]),

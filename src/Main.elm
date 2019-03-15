@@ -92,7 +92,7 @@ updateOutMsg msg model =
       (model_, updateOutCmd msg_ model_)
     (ChangeSpeedMsg subMsg) ->
       let
-        msg_ = ChangeSpeed.outMsg subMsg
+        msg_ = ChangeSpeed.outMsg subMsg model.changeSpeedModel
         model_ = updateOutModel msg_ model in
       (model_, updateOutCmd msg_ model_)
     _ -> (model, Cmd.none)
