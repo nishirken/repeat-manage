@@ -57,7 +57,7 @@ resetTemp : List String -> Model -> List String
 resetTemp xs model = if List.length xs == 0 then model.symbols else xs
 
 ranges : List a -> (Int, Int)
-ranges xs = (0, (List.length xs) - 1)
+ranges xs = if List.length xs == 0 then (0, 0) else (0, (List.length xs) - 1)
 
 fromIndex : List String -> Int -> String
 fromIndex xs i = case Array.get i (Array.fromList xs) of
